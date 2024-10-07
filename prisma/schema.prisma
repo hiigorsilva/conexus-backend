@@ -14,27 +14,56 @@ datasource db {
 }
 
 model User {
-  username String  @id
-  email    String  @unique
+  username String      @id
+  email    String      @unique
   password String
   name     String
-  avatar   String  @default("default.jpg")
-  cover    String  @default("default.jpg")
+  avatar   String      @default("default.jpg")
+  cover    String      @default("default.jpg")
   bio      String?
   link     String?
+  tweets   Tweet[]
+  likes    TweetLike[]
+
+  @@map("user")
 }
 
 model Tweet {
-  id        Int      @id @default(autoincrement())
+  id        Int         @id @default(autoincrement())
   userSlug  String
   body      String
   image     String?
-  createdAt DateTime @default(now())
-  answerOf  Int      @default(0)
+  createdAt DateTime    @default(now())
+  answerOf  Int         @default(0)
+  user      User        @relation(fields: [userSlug], references: [username])
+  likes     TweetLike[]
+
+  @@map("tweet")
 }
 
 model TweetLike {
   id       Int    @id @default(autoincrement())
   userSlug String
   tweetId  Int
+  user     User   @relation(fields: [userSlug], references: [username])
+  tweet    Tweet  @relation(fields: [tweetId], references: [id])
+
+  @@map("tweet_like")
+}
+
+model Follow {
+  id        Int    @id @default(autoincrement())
+  user1Slug String
+  user2Slug String
+
+  @@map("follow")
+}
+
+model Trend {
+  id        Int      @id @default(autoincrement())
+  hashtag   String
+  counter   Int      @default(1)
+  updatedAt DateTime @default(now())
+
+  @@map("trend")
 }
