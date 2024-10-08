@@ -4,3 +4,4 @@ import * as pingController from '../controllers/ping'
 export const mainRouter = Router()
 
 mainRouter.get('/ping', pingController.ping)
+// mainRouter.get('/private-ping')
