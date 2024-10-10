@@ -6,7 +6,9 @@ export const findUserByEmail = async (email: string) => {
   const user = await prisma.user.findFirst({
     select: {
       username: true,
+      name: true,
       email: true,
+      password: true,
       avatar: true,
       cover: true,
       bio: true,
