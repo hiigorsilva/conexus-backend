@@ -1,11 +1,13 @@
-import { hash } from 'bcrypt-ts'
+import { compare, hash } from 'bcrypt-ts'
 import type { RequestHandler } from 'express'
 import slug from 'slug'
+import { signinSchema } from '../schemas/signin'
 import { signupSchema } from '../schemas/signup'
 import { createUser, findUserByEmail, findUserBySlug } from '../services/user'
+import { createJWT } from '../utils/jwt'
 
 export const signup: RequestHandler = async (req, res) => {
-  // validar os dados recebidos
+  // validar os dados preenchidos
   const safeData = signupSchema.safeParse(req.body)
   if (!safeData.success) {
     res.status(400).json({ error: safeData.error.flatten().fieldErrors })
@@ -48,16 +50,50 @@ export const signup: RequestHandler = async (req, res) => {
   })
 
   // cria  token
-  const token = ''
+  const token = createJWT(username)
 
   // retorna o resultado (token, user)
-
   res.status(201).json({
     token,
     user: {
       username: newUser.username,
       name: newUser.name,
       avatar: newUser.avatar,
+    },
+  })
+}
+
+export const signin: RequestHandler = async (req, res) => {
+  // valida os dados preenchidos
+  const safeData = signinSchema.safeParse(req.body)
+  if (!safeData.success) {
+    res.status(400).json({ error: safeData.error.flatten().fieldErrors })
+    return
+  }
+
+  // verifica se o email está cadastrado
+  const user = await findUserByEmail(safeData.data.email)
+  if (!user) {
+    res.status(401).json({ error: 'Email ou senha inválidos' })
+    return
+  }
+
+  // verifica se a senha está correta
+  const verifyPass = await compare(safeData.data.password, user.password)
+  if (!verifyPass) {
+    res.status(401).json({ error: 'Email ou senha inválidos' })
+  }
+
+  // cria o token
+  const token = createJWT(user.username)
+
+  // retorna o resultado (token, user)
+  res.json({
+    token,
+    user: {
+      name: user.name,
+      username: user.username,
+      avatar: user.avatar,
     },
   })
 }
