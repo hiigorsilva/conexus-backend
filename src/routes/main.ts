@@ -16,7 +16,7 @@ mainRouter.post('/auth/signin', authController.signin)
 
 // TWEET
 mainRouter.post('/tweet', verifyJWT, tweetController.addTweet)
-// mainRouter.get('/tweet/:id') // pega um tweet especifico
+mainRouter.get('/tweet/:id', verifyJWT, tweetController.getTweet)
 // mainRouter.get('/tweet/:id/answers') // pega as respostas de um tweet
 // mainRouter.post('/tweet/:id/like') // dá like em um tweet
 
