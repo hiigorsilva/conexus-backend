@@ -80,6 +80,7 @@ export const findAnswersFromTweet = async (id: number) => {
     console.error('Erro ao buscar respostas: ', err)
   }
 }
+
 export const checkIfTweetIsLikedByUser = async (
   username: string,
   id: number
@@ -121,5 +122,29 @@ export const likeTweet = async (username: string, id: number) => {
     })
   } catch (err) {
     console.error('Erro ao curtir tweet: ', err)
+  }
+}
+
+export const findTweetByUser = async (
+  username: string,
+  currentPage: number,
+  perPage: number
+) => {
+  try {
+    const tweets = await prisma.tweet.findMany({
+      include: {
+        likes: {
+          select: { userSlug: true },
+        },
+      },
+      where: { userSlug: username, answerOf: 0 },
+      orderBy: { createdAt: 'desc' },
+      skip: currentPage * perPage, // qtd de tweets que pula para ir a próxima página
+      take: perPage, // qtd de tweets que serão retornados
+    })
+
+    return tweets
+  } catch (err) {
+    console.error('Erro ao buscar tweets do usuário: ', err)
   }
 }
