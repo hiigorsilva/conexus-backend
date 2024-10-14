@@ -2,9 +2,12 @@ import type { Response } from 'express'
 import { addTweetSchema } from '../schemas/add-tweet'
 import { addHashtagToTrend } from '../services/trend'
 import {
+  checkIfTweetIsLikedByUser,
   createTweet,
   findAnswersFromTweet,
   findTweetById,
+  likeTweet,
+  unlikedTweet,
 } from '../services/tweet'
 import type { ExtendedRequest } from '../types/extended-request'
 
@@ -63,4 +66,29 @@ export const getAnswers = async (req: ExtendedRequest, res: Response) => {
   const { id } = req.params
 
   const answers = await findAnswersFromTweet(Number.parseInt(id))
+
+  res.json({ answers })
+}
+
+export const likeTweetToggle = async (req: ExtendedRequest, res: Response) => {
+  try {
+    const { id } = req.params
+
+    const liked = await checkIfTweetIsLikedByUser(
+      req.username as string,
+      Number.parseInt(id)
+    )
+
+    if (liked) {
+      unlikedTweet(req.username as string, Number.parseInt(id))
+    }
+
+    if (!liked) {
+      likeTweet(req.username as string, Number.parseInt(id))
+    }
+  } catch (err) {
+    console.error('Erro ao curtir/descurtir tweet: ', err)
+  }
+
+  res.json({ success: true })
 }
