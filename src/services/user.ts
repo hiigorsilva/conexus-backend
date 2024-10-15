@@ -78,3 +78,26 @@ export const getUserTweetsCount = async (username: string) => {
   })
   return count
 }
+
+export const checkIfFollows = async (user1Slug: string, user2Slug: string) => {
+  const follows = await prisma.follow.findFirst({
+    where: { user1Slug, user2Slug },
+  })
+  return !!follows
+}
+
+export const followUser = async (user1Slug: string, user2Slug: string) => {
+  if (user1Slug === user2Slug) {
+    throw new Error('Você não pode seguir a si mesmo.')
+  }
+
+  await prisma.follow.create({
+    data: { user1Slug, user2Slug },
+  })
+}
+
+export const unfollowUser = async (user1Slug: string, user2Slug: string) => {
+  await prisma.follow.deleteMany({
+    where: { user1Slug, user2Slug },
+  })
+}
