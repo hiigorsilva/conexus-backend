@@ -101,3 +101,13 @@ export const unfollowUser = async (user1Slug: string, user2Slug: string) => {
     where: { user1Slug, user2Slug },
   })
 }
+
+export const updateUserInfo = async (
+  username: string,
+  data: Prisma.UserUpdateInput
+) => {
+  await prisma.user.update({
+    where: { username },
+    data,
+  })
+}

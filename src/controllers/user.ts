@@ -1,4 +1,5 @@
 import type { Response } from 'express'
+import { updateUserSchema } from '../schemas/update-user'
 import { userTweetsSchema } from '../schemas/user-tweets'
 import { findTweetByUser } from '../services/tweet'
 import {
@@ -9,6 +10,7 @@ import {
   getUserFollowingCount,
   getUserTweetsCount,
   unfollowUser,
+  updateUserInfo,
 } from '../services/user'
 import type { ExtendedRequest } from '../types/extended-request'
 
@@ -75,5 +77,21 @@ export const followUserToggle = async (req: ExtendedRequest, res: Response) => {
     }
   } catch (err) {
     console.error('Erro ao seguir usuário: ', err)
+  }
+}
+
+export const updateUser = async (req: ExtendedRequest, res: Response) => {
+  try {
+    const safeData = updateUserSchema.safeParse(req.body)
+    if (!safeData.success) {
+      res.status(400).json({ error: safeData.error.flatten().fieldErrors })
+      return
+    }
+
+    await updateUserInfo(req.username as string, safeData.data)
+
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Erro ao atualizar informações do usuário: ', err)
   }
 }
