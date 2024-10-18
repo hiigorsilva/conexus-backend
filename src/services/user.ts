@@ -111,3 +111,12 @@ export const updateUserInfo = async (
     data,
   })
 }
+
+export const getUserFollowing = async (username: string) => {
+  const followingRelations = await prisma.follow.findMany({
+    select: { user2Slug: true }, // pessoas que o usuário logado está seguindo
+    where: { user1Slug: username }, // usuário logado
+  })
+
+  return followingRelations.map(follow => follow.user2Slug)
+}

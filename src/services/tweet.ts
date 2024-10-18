@@ -148,3 +148,45 @@ export const findTweetByUser = async (
     console.error('Erro ao buscar tweets do usuário: ', err)
   }
 }
+
+export const findTweetFeed = async (
+  following: string[],
+  currentPage: number,
+  perPage: number
+) => {
+  try {
+    const tweets = await prisma.tweet.findMany({
+      include: {
+        user: {
+          select: {
+            name: true,
+            avatar: true,
+            username: true,
+          },
+        },
+        likes: {
+          select: {
+            userSlug: true,
+          },
+        },
+      },
+      where: {
+        userSlug: { in: following },
+        answerOf: 0,
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: currentPage * perPage,
+      take: perPage,
+    })
+
+    return tweets.map(tweet => ({
+      ...tweet,
+      user: {
+        ...tweet.user,
+        avatar: getPublicUrl(tweet.user.avatar),
+      },
+    }))
+  } catch (err) {
+    console.error('Erro ao buscar tweets do usuário: ', err)
+  }
+}
