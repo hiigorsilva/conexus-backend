@@ -10,7 +10,7 @@ export const searchTweets = async (req: ExtendedRequest, res: Response) => {
     return
   }
 
-  const perPage = 2
+  const perPage = 10
   const currentPage = safeData.data.page ?? 0
 
   const tweets = await findTweetsByBody(safeData.data.q, currentPage, perPage)

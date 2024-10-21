@@ -11,7 +11,7 @@ export const getFeed = async (req: ExtendedRequest, res: Response) => {
     return
   }
 
-  const perPage = 2
+  const perPage = 10
   const currentPage = safeData.data.page ?? 0
 
   const following = await getUserFollowing(req.username as string)

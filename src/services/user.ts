@@ -26,7 +26,7 @@ export const findUserByEmail = async (email: string) => {
   }
 }
 
-export const findUserBySlug = async (slug: string) => {
+export const findUserBySlug = async (username: string) => {
   const user = await prisma.user.findFirst({
     select: {
       username: true,
@@ -36,7 +36,7 @@ export const findUserBySlug = async (slug: string) => {
       bio: true,
       link: true,
     },
-    where: { username: slug },
+    where: { username },
   })
 
   if (!user) return null
@@ -119,4 +119,36 @@ export const getUserFollowing = async (username: string) => {
   })
 
   return followingRelations.map(follow => follow.user2Slug)
+}
+
+export const getUserSuggestions = async (username: string) => {
+  const following = await getUserFollowing(username)
+  const followingPlusMe = [...following, username]
+
+  type Suggestion = Pick<
+    Prisma.UserGetPayload<Prisma.UserDefaultArgs>,
+    'name' | 'avatar' | 'username'
+  >
+
+  const suggestions: Suggestion[] = await prisma.$queryRaw`
+    SELECT
+      name, avatar, username
+    FROM "user"
+    WHERE
+      username NOT IN (${followingPlusMe.map(user => `${user}`).join(',')})
+    ORDER BY RANDOM()
+    LIMIT 2
+  `
+
+  for (const suggestion in suggestions) {
+    suggestions[suggestion].avatar = getPublicUrl(
+      suggestions[suggestion].avatar
+    )
+  }
+
+  // suggestions.map(suggestion => {
+  //   suggestion.avatar = getPublicUrl(suggestion.avatar)
+  // })
+
+  return suggestions
 }

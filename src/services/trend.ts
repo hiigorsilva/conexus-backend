@@ -20,3 +20,16 @@ export const addHashtagToTrend = async (hashtag: string) => {
     })
   }
 }
+
+export const getTrending = async () => {
+  const trends = await prisma.trend.findMany({
+    select: {
+      hashtag: true,
+      counter: true,
+    },
+    orderBy: { counter: 'desc' },
+    take: 4,
+  })
+
+  return trends
+}
